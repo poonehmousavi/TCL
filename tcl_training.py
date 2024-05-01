@@ -13,9 +13,8 @@ import os
 import pickle
 import shutil
 
-from subfunc.generate_artificial_data import generate_artificial_data
-from subfunc.preprocessing import pca
-from tcl.tcl_train import train
+from tcl_pytorch.custom_datase import SimulatedDataset
+from tcl_pytorch.train import train
 
 
 # Parameters ==================================================
@@ -38,13 +37,14 @@ initial_learning_rate = 0.01 # initial learning rate
 momentum = 0.9 # momentum parameter of SGD
 max_steps = int(7e5) # number of iterations (mini-batches)
 decay_steps = int(5e5) # decay steps (tf.train.exponential_decay)
+max_steps_init = 2
 decay_factor = 0.1 # decay factor (tf.train.exponential_decay)
 batch_size = 512 # mini-batch size
 moving_average_decay = 0.999 # moving average decay of variables to be saved
 checkpoint_steps = 1e5 # interval to save checkpoint
 
 # for MLR initialization
-max_steps_init = int(7e4) # number of iterations (mini-batches) for initializing only MLR
+# max_steps_init = int(7e4) # number of iterations (mini-batches) for initializing only MLR
 decay_steps_init = int(5e4) # decay steps for initializing only MLR
 
 # Other -------------------------------------------------------
@@ -68,21 +68,15 @@ else:
     assert False, "savefolder looks wrong"
 
 
-# Generate sensor signal --------------------------------------
-sensor, source, label = generate_artificial_data(num_comp=num_comp,
+train_dataset = SimulatedDataset(num_comp=num_comp,
                                                  num_segment=num_segment,
                                                  num_segmentdata=num_segmentdata,
                                                  num_layer=num_layer,
                                                  random_seed=random_seed)
 
 
-# Preprocessing -----------------------------------------------
-sensor, pca_parm = pca(sensor, num_comp=num_comp)
-
-
 # Train model (only MLR) --------------------------------------
-train(sensor,
-      label,
+train(train_dataset,
       num_class = num_segment,
       list_hidden_nodes = list_hidden_nodes,
       initial_learning_rate = initial_learning_rate,
@@ -101,14 +95,13 @@ train(sensor,
 init_model_path = os.path.join(train_dir, 'model_init.ckpt')
 
 
-# Train model -------------------------------------------------
-train(sensor,
-      label,
+# # Train model -------------------------------------------------
+train(train_dataset,
       num_class = num_segment,
       list_hidden_nodes = list_hidden_nodes,
       initial_learning_rate = initial_learning_rate,
       momentum = momentum,
-      max_steps = max_steps,
+      max_steps = max_steps_init,
       decay_steps = decay_steps,
       decay_factor = decay_factor,
       batch_size = batch_size,
@@ -127,11 +120,10 @@ model_parm = {'random_seed':random_seed,
               'num_layer':num_layer,
               'list_hidden_nodes':list_hidden_nodes,
               'moving_average_decay':moving_average_decay,
-              'pca_parm':pca_parm}
+              'pca_parm':train_dataset.pca_parm}
 
 print("Save parameters...")
 with open(saveparmpath, 'wb') as f:
     pickle.dump(model_parm, f, pickle.HIGHEST_PROTOCOL)
-
 print("done.")
 
