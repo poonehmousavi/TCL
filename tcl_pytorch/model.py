@@ -26,7 +26,7 @@ class TCL(nn.Module):
         self.layerMLR = nn.Linear(list_hidden_nodes[-1], num_class, bias=True)
 
     def forward(self, x):
-        with torch.set_grad_enabled(not self.MLP_trainable):
+        with torch.set_grad_enabled(self.MLP_trainable):
             for ln in range(self.num_layer):
                 x = self.hidden_layers[ln](x)
 
