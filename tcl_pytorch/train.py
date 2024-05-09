@@ -6,7 +6,7 @@ from datetime import datetime
 import os.path
 import time
 import numpy as np
-from tcl_pytorch.model import TCL
+from tcl_pytorch.model import TCL,TCL_new
 import torch.utils.data as data
 
 
@@ -36,7 +36,7 @@ def train(dataset,
 
 
     # Define your model
-    model = TCL(input_size=dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_class,MLP_trainable=MLP_trainable)
+    model = TCL_new(input_size=dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_class,MLP_trainable=MLP_trainable)
 
     if load_file:
         load_path = os.path.join(train_dir, load_file)
@@ -100,7 +100,7 @@ def train(dataset,
             # if step % checkpoint_steps == 0:
             #     # Save checkpoint
 
-        scheduler.step()
+        # scheduler.step()
 
     # Save trained model
     save_path = os.path.join(train_dir, save_file)

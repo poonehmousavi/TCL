@@ -23,7 +23,7 @@ from tcl_pytorch.train import train
 # Data generation ---------------------------------------------
 random_seed = 0 # random seed
 num_comp = 20 # number of components (dimension)
-num_segment = 256 # number of segments
+num_segment = 8 # number of segments
 num_segmentdata = 512 # number of data-points in each segment
 num_layer = 5 # number of layers of mixing-MLP
 
@@ -33,13 +33,13 @@ list_hidden_nodes = [40, 40, 40, 40, 20]
 # [layer1, layer2, ..., layer(num_layer)]
 
 # Training ----------------------------------------------------
-initial_learning_rate = 0.01 # initial learning rate
+initial_learning_rate = 0.1 # initial learning rate
 momentum = 0.9 # momentum parameter of SGD
 max_steps = int(7e5) # number of iterations (mini-batches)
 decay_steps = int(5e5) # decay steps (tf.train.exponential_decay)
-max_steps_init = 2
-decay_factor = 0.1 # decay factor (tf.train.exponential_decay)
-batch_size = 512 # mini-batch size
+max_steps_init = 15
+decay_factor = 0.01 # decay factor (tf.train.exponential_decay)
+batch_size = 8 # mini-batch size
 moving_average_decay = 0.999 # moving average decay of variables to be saved
 checkpoint_steps = 1e5 # interval to save checkpoint
 
@@ -76,21 +76,21 @@ train_dataset = SimulatedDataset(num_comp=num_comp,
 
 
 # Train model (only MLR) --------------------------------------
-train(train_dataset,
-      num_class = num_segment,
-      list_hidden_nodes = list_hidden_nodes,
-      initial_learning_rate = initial_learning_rate,
-      momentum = momentum,
-      max_steps = max_steps_init, # For init
-      decay_steps = decay_steps_init, # For init
-      decay_factor = decay_factor,
-      batch_size = batch_size,
-      train_dir = train_dir,
-      checkpoint_steps = checkpoint_steps,
-      moving_average_decay = moving_average_decay,
-      MLP_trainable = False, # For init
-      save_file='model_init.ckpt', # For init
-      random_seed = random_seed)
+# train(train_dataset,
+#       num_class = num_segment,
+#       list_hidden_nodes = list_hidden_nodes,
+#       initial_learning_rate = initial_learning_rate,
+#       momentum = momentum,
+#       max_steps = max_steps_init, # For init
+#       decay_steps = decay_steps_init, # For init
+#       decay_factor = decay_factor,
+#       batch_size = batch_size,
+#       train_dir = train_dir,
+#       checkpoint_steps = checkpoint_steps,
+#       moving_average_decay = moving_average_decay,
+#       MLP_trainable = False, # For init
+#       save_file='model_init.ckpt', # For init
+#       random_seed = random_seed)
 
 init_model_path = os.path.join(train_dir, 'model_init.ckpt')
 
