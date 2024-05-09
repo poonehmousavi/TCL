@@ -27,7 +27,7 @@ from subfunc.munkres import Munkres
 eval_dir = './storage/temp'
 parmpath = os.path.join(eval_dir, 'parm.pkl')
 modelpath = os.path.join(eval_dir, 'model.pth')
-apply_fastICA = True
+apply_fastICA = False
 nonlinearity_to_source = 'abs' # Assume that sources are generated from laplacian distribution
 
 # =============================================================
@@ -117,7 +117,7 @@ data_loader = data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
 
 
 test_acc =0
-abscorr =[]
+abscorr = []
 labels=[]
 predictions=[]
 if apply_fastICA:
@@ -137,19 +137,21 @@ for data_inputs, data_labels in data_loader:
         # Apply fastICA -----------------------------------------------
     if apply_fastICA:
         feat_val = ica.fit_transform(feats.detach().numpy())
+    else:
+        feat_val = feats.detach().numpy()
     # Evaluate ----------------------------------------------------
     if nonlinearity_to_source == 'abs':
         xseval = np.abs(x_batch) # Original source
     else:
         raise ValueError
-    feateval = feat_val.T # Estimated feature
+    # feateval = feat_val.T # Estimated feature
     #
-    corrmat, sort_idx, _ = correlation(feateval, xseval, 'Pearson')
-    abscorr.extend(np.sum(np.abs(np.diag(corrmat))))
+    corrmat, sort_idx, _ = correlation(feat_val, xseval.detach().numpy(), 'Pearson')
+    abscorr.extend(np.abs(np.diag(corrmat)))
 
 accuracy = test_acc/eval_dataset.__len__()
 confmat= confusion_matrix(labels, predictions)
-meanabscorr=np.means(abscorr)
+meanabscorr=np.mean(abscorr)
 
 
 # Display results ---------------------------------------------
