@@ -156,7 +156,7 @@ meanabscorr=np.mean(abscorr)
 
 # Display results ---------------------------------------------
 print("Result...")
-print("    accuracy(train) : {0:7.4f} [%]".format(accuracy*100))
+print("    accuracy(test) : {0:7.4f} [%]".format(accuracy*100))
 print("    correlation     : {0:7.4f}".format(meanabscorr))
 
 print("done.")

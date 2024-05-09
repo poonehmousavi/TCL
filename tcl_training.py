@@ -76,21 +76,21 @@ train_dataset = SimulatedDataset(num_comp=num_comp,
 
 
 # Train model (only MLR) --------------------------------------
-# train(train_dataset,
-#       num_class = num_segment,
-#       list_hidden_nodes = list_hidden_nodes,
-#       initial_learning_rate = initial_learning_rate,
-#       momentum = momentum,
-#       max_steps = max_steps_init, # For init
-#       decay_steps = decay_steps_init, # For init
-#       decay_factor = decay_factor,
-#       batch_size = batch_size,
-#       train_dir = train_dir,
-#       checkpoint_steps = checkpoint_steps,
-#       moving_average_decay = moving_average_decay,
-#       MLP_trainable = False, # For init
-#       save_file='model_init.ckpt', # For init
-#       random_seed = random_seed)
+train(train_dataset,
+      num_class = num_segment,
+      list_hidden_nodes = list_hidden_nodes,
+      initial_learning_rate = initial_learning_rate,
+      momentum = momentum,
+      max_steps = max_steps_init, # For init
+      decay_steps = decay_steps_init, # For init
+      decay_factor = decay_factor,
+      batch_size = batch_size,
+      train_dir = train_dir,
+      checkpoint_steps = checkpoint_steps,
+      moving_average_decay = moving_average_decay,
+      MLP_trainable = False, # For init
+      save_file='model_init.ckpt', # For init
+      random_seed = random_seed)
 
 init_model_path = os.path.join(train_dir, 'model_init.ckpt')
 
