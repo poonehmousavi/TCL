@@ -15,7 +15,10 @@ import shutil
 
 from tcl_pytorch.custom_datase import SimulatedDataset
 from tcl_pytorch.train import train
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 # Parameters ==================================================
 # =============================================================
@@ -23,7 +26,7 @@ from tcl_pytorch.train import train
 # Data generation ---------------------------------------------
 random_seed = 0 # random seed
 num_comp = 20 # number of components (dimension)
-num_segment = 512 # number of segments
+num_segment = 8 # number of segments
 num_segmentdata = 512 # number of data-points in each segment
 num_layer = 5 # number of layers of mixing-MLP
 
@@ -49,7 +52,8 @@ decay_steps_init = int(5e4) # decay steps for initializing only MLR
 
 # Other -------------------------------------------------------
 # # Note: save folder must be under ./storage
-train_dir = './experiment/l5-seg512' # save directory (Caution!! this folder will be removed at first)
+dir_path=f'./experiment/layer{len(list_hidden_nodes)}-seg{num_segment}' 
+train_dir = dir_path # save directory (Caution!! this folder will be removed at first)
 saveparmpath = os.path.join(train_dir, 'parm.pkl') # file name to save parameters
 
 
@@ -57,7 +61,7 @@ saveparmpath = os.path.join(train_dir, 'parm.pkl') # file name to save parameter
 # =============================================================
 
 # Prepare save folder -----------------------------------------
-if train_dir.find("./experiment/l5-seg512") > -1:
+if train_dir.find(dir_path) > -1:
     if os.path.exists(train_dir):
         print("delete savefolder: {0:s}...".format(train_dir))
         shutil.rmtree(train_dir)  # Remove folder
@@ -66,7 +70,13 @@ if train_dir.find("./experiment/l5-seg512") > -1:
 else:
     assert False, "savefolder looks wrong"
 
-
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG,
+                    handlers=[
+                    logging.FileHandler(filename=os.path.join(dir_path,"log.txt"),
+                   ),
+                    logging.StreamHandler()])
 train_dataset = SimulatedDataset(num_comp=num_comp,
                                                  num_segment=num_segment,
                                                  num_segmentdata=num_segmentdata,
@@ -121,8 +131,8 @@ model_parm = {'random_seed':random_seed,
               'moving_average_decay':moving_average_decay,
               'pca_parm':train_dataset.pca_parm}
 
-print("Save parameters...")
+logger.info("Save parameters...")
 with open(saveparmpath, 'wb') as f:
     pickle.dump(model_parm, f, pickle.HIGHEST_PROTOCOL)
-print("done.")
+logger.info("done.")
 

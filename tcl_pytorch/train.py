@@ -9,7 +9,9 @@ import numpy as np
 from tcl_pytorch.model import TCL,TCL_new
 import torch.utils.data as data
 
+import logging
 
+logger = logging.getLogger(__name__)
 def train(dataset,
           num_class,
           list_hidden_nodes,
@@ -94,7 +96,7 @@ def train(dataset,
             examples_per_sec = num_examples_per_step / duration
             sec_per_batch = float(duration)
 
-        print('%s: step %d, lr = %f, loss = %.2f, accuracy = %.2f (%.1f examples/sec; %.3f sec/batch)' %
+        logger.info('%s: step %d, lr = %f, loss = %.2f, accuracy = %.2f (%.1f examples/sec; %.3f sec/batch)' %
                     (datetime.now(), step, optimizer.param_groups[0]['lr'], np.mean(losses), accuracy/i * 100,
                     examples_per_sec, sec_per_batch))
 
@@ -109,7 +111,7 @@ def train(dataset,
     # Save trained model
     save_path = os.path.join(train_dir, save_file)
     torch.save(model.state_dict(), save_path)
-    print("Save model in file:", save_path)
+    logger.info(f"Save model in file: {save_path}")
 
 
 
