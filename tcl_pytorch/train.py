@@ -36,7 +36,7 @@ def train(dataset,
 
 
     # Define your model
-    model = TCL_new(input_size=dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_class,MLP_trainable=MLP_trainable)
+    model = TCL(input_size=dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_class,MLP_trainable=MLP_trainable)
 
     if load_file:
         load_path = os.path.join(train_dir, load_file)
@@ -54,10 +54,13 @@ def train(dataset,
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=decay_factor)
 
     train_data_loader = data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
+   
     # Start training
+    
     for step in range(max_steps):
-
+        i=0
+        accuracy=0
+        losses=[]
         for data_inputs, data_labels in train_data_loader:
             start_time = time.time()
 
@@ -73,6 +76,8 @@ def train(dataset,
 
             # Compute the loss
             loss = criterion(logits, y_batch)
+            losses.append(loss.item())
+            i+=1
 
             # Backward pass
             loss.backward()
@@ -82,17 +87,16 @@ def train(dataset,
 
             duration = time.time() - start_time
 
-            accuracy = calculate_accuracy(logits, y_batch)
-            step += 1
+            accuracy += calculate_accuracy(logits, y_batch)
 
-            if step % 100 == 0:
-                num_examples_per_step = batch_size
-                examples_per_sec = num_examples_per_step / duration
-                sec_per_batch = float(duration)
+        if step % 100 == 0:
+            num_examples_per_step = batch_size
+            examples_per_sec = num_examples_per_step / duration
+            sec_per_batch = float(duration)
 
-                print('%s: step %d, lr = %f, loss = %.2f, accuracy = %.2f (%.1f examples/sec; %.3f sec/batch)' %
-                      (datetime.now(), step, optimizer.param_groups[0]['lr'], loss.item(), accuracy * 100,
-                       examples_per_sec, sec_per_batch))
+        print('%s: step %d, lr = %f, loss = %.2f, accuracy = %.2f (%.1f examples/sec; %.3f sec/batch)' %
+                    (datetime.now(), step, optimizer.param_groups[0]['lr'], np.mean(losses), accuracy/i * 100,
+                    examples_per_sec, sec_per_batch))
 
             # if step % summary_steps == 0:
             #     # Add summary

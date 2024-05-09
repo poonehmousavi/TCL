@@ -33,11 +33,11 @@ list_hidden_nodes = [40, 40, 40, 40, 20]
 # [layer1, layer2, ..., layer(num_layer)]
 
 # Training ----------------------------------------------------
-initial_learning_rate = 0.1 # initial learning rate
+initial_learning_rate = 0.001 # initial learning rate
 momentum = 0.9 # momentum parameter of SGD
 max_steps = int(7e5) # number of iterations (mini-batches)
 decay_steps = int(5e5) # decay steps (tf.train.exponential_decay)
-max_steps_init = 15
+max_steps_init = 50
 decay_factor = 0.01 # decay factor (tf.train.exponential_decay)
 batch_size = 8 # mini-batch size
 moving_average_decay = 0.999 # moving average decay of variables to be saved
@@ -51,7 +51,6 @@ decay_steps_init = int(5e4) # decay steps for initializing only MLR
 # # Note: save folder must be under ./storage
 train_dir = './storage/temp' # save directory (Caution!! this folder will be removed at first)
 saveparmpath = os.path.join(train_dir, 'parm.pkl') # file name to save parameters
-
 
 
 # =============================================================

@@ -17,7 +17,7 @@ import torch
 from tcl_pytorch.custom_datase import SimulatedDataset
 from tcl_pytorch.model import TCL,TCL_new
 import torch.utils.data as data
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix,accuracy_score
 from subfunc.munkres import Munkres
 
 
@@ -29,6 +29,8 @@ parmpath = os.path.join(eval_dir, 'parm.pkl')
 modelpath = os.path.join(eval_dir, 'model.pth')
 apply_fastICA = False
 nonlinearity_to_source = 'abs' # Assume that sources are generated from laplacian distribution
+
+
 
 # =============================================================
 def correlation(x, y, method='Pearson'):
@@ -110,7 +112,7 @@ eval_dataset = SimulatedDataset(num_comp=num_comp,
 
 # Preprocessing -----------------------------------------------
 
-model = TCL_new(input_size=eval_dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_segment)
+model = TCL(input_size=eval_dataset.__getinputsize__(), list_hidden_nodes=list_hidden_nodes, num_class=num_segment)
 model.load_state_dict(state_dict)
 
 data_loader = data.DataLoader(eval_dataset, batch_size=batch_size, shuffle=True)
@@ -123,6 +125,7 @@ predictions=[]
 if apply_fastICA:
     ica = FastICA(random_state=random_seed)
 # Evaluate model ----------------------------------------------
+   
 for data_inputs, data_labels in data_loader:
     ## Step 1: Move input data to device (only strictly necessary if we use GPU)
     x_batch = data_inputs
@@ -131,7 +134,7 @@ for data_inputs, data_labels in data_loader:
     logits, feats = model(x_batch)
     # Calculate predictions.
     top_values, pred = torch.topk(logits, k=1)
-    test_acc = torch.sum(top_values == y_batch)
+    test_acc += torch.sum(pred == y_batch)
     labels.extend(y_batch.detach().numpy())
     predictions.extend(pred.detach().numpy())
         # Apply fastICA -----------------------------------------------
@@ -149,7 +152,8 @@ for data_inputs, data_labels in data_loader:
     corrmat, sort_idx, _ = correlation(feat_val, xseval.detach().numpy(), 'Pearson')
     abscorr.extend(np.abs(np.diag(corrmat)))
 
-accuracy = test_acc/eval_dataset.__len__()
+# accuracy = test_acc/eval_dataset.__len__()
+accuracy = accuracy_score(labels, predictions)
 confmat= confusion_matrix(labels, predictions)
 meanabscorr=np.mean(abscorr)
 
