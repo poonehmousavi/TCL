@@ -23,7 +23,7 @@ from tcl_pytorch.train import train
 # Data generation ---------------------------------------------
 random_seed = 0 # random seed
 num_comp = 20 # number of components (dimension)
-num_segment = 8 # number of segments
+num_segment = 512 # number of segments
 num_segmentdata = 512 # number of data-points in each segment
 num_layer = 5 # number of layers of mixing-MLP
 
@@ -33,13 +33,13 @@ list_hidden_nodes = [40, 40, 40, 40, 20]
 # [layer1, layer2, ..., layer(num_layer)]
 
 # Training ----------------------------------------------------
-initial_learning_rate = 0.001 # initial learning rate
+initial_learning_rate = 0.01 # initial learning rate
 momentum = 0.9 # momentum parameter of SGD
 max_steps = int(7e5) # number of iterations (mini-batches)
 decay_steps = int(5e5) # decay steps (tf.train.exponential_decay)
-max_steps_init = 50
-decay_factor = 0.01 # decay factor (tf.train.exponential_decay)
-batch_size = 8 # mini-batch size
+max_steps_init = 500
+decay_factor = 0.1 # decay factor (tf.train.exponential_decay)
+batch_size = 512 # mini-batch size
 moving_average_decay = 0.999 # moving average decay of variables to be saved
 checkpoint_steps = 1e5 # interval to save checkpoint
 
@@ -49,7 +49,7 @@ decay_steps_init = int(5e4) # decay steps for initializing only MLR
 
 # Other -------------------------------------------------------
 # # Note: save folder must be under ./storage
-train_dir = './storage/temp' # save directory (Caution!! this folder will be removed at first)
+train_dir = './experiment/l5-seg512' # save directory (Caution!! this folder will be removed at first)
 saveparmpath = os.path.join(train_dir, 'parm.pkl') # file name to save parameters
 
 
@@ -57,7 +57,7 @@ saveparmpath = os.path.join(train_dir, 'parm.pkl') # file name to save parameter
 # =============================================================
 
 # Prepare save folder -----------------------------------------
-if train_dir.find("./storage/") > -1:
+if train_dir.find("./experiment/l5-seg512") > -1:
     if os.path.exists(train_dir):
         print("delete savefolder: {0:s}...".format(train_dir))
         shutil.rmtree(train_dir)  # Remove folder
@@ -80,7 +80,7 @@ train(train_dataset,
       list_hidden_nodes = list_hidden_nodes,
       initial_learning_rate = initial_learning_rate,
       momentum = momentum,
-      max_steps = max_steps_init, # For init
+      max_steps = 10, # For init
       decay_steps = decay_steps_init, # For init
       decay_factor = decay_factor,
       batch_size = batch_size,
