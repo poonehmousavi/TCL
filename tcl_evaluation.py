@@ -27,7 +27,7 @@ from subfunc.munkres import Munkres
 eval_dir = './storage/temp'
 parmpath = os.path.join(eval_dir, 'parm.pkl')
 modelpath = os.path.join(eval_dir, 'model.pth')
-apply_fastICA = False
+apply_fastICA = True
 nonlinearity_to_source = 'abs' # Assume that sources are generated from laplacian distribution
 
 
@@ -139,17 +139,18 @@ for data_inputs, data_labels in data_loader:
     predictions.extend(pred.detach().numpy())
         # Apply fastICA -----------------------------------------------
     if apply_fastICA:
-        feat_val = ica.fit_transform(feats.detach().numpy())
+        feateval = feats.T 
+        feat_val = ica.fit_transform(feateval.detach().numpy())
     else:
         feat_val = feats.detach().numpy()
-    # Evaluate ----------------------------------------------------
+    # Evaluate ----------------------------------------------------5
     if nonlinearity_to_source == 'abs':
         xseval = np.abs(x_batch) # Original source
     else:
         raise ValueError
-    # feateval = feat_val.T # Estimated feature
+    # Estimated feature
     #
-    corrmat, sort_idx, _ = correlation(feat_val, xseval.detach().numpy(), 'Pearson')
+    corrmat, sort_idx, _ = correlation(feat_val.T, xseval.detach().numpy(), 'Pearson')
     abscorr.extend(np.abs(np.diag(corrmat)))
 
 # accuracy = test_acc/eval_dataset.__len__()
