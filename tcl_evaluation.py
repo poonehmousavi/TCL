@@ -19,6 +19,7 @@ from tcl_pytorch.model import TCL,TCL_new
 import torch.utils.data as data
 from sklearn.metrics import confusion_matrix,accuracy_score
 from subfunc.munkres import Munkres
+import seaborn as sns
 
 
 # parameters ==================================================
@@ -160,18 +161,21 @@ confmat= confusion_matrix(labels, predictions)
 meanabscorr=np.mean(abscorr)
 from sklearn.linear_model import LinearRegression
 
+source, pca_parm = pca(eval_dataset.source, num_comp=num_comp)
+
 feat_vals = np.stack(feat_vals, axis=0).reshape(-1,20)
-reg1 = LinearRegression().fit(feat_vals, eval_dataset.source.transpose())
-tcl_score= reg1.score(feat_vals, eval_dataset.source.transpose())
-print("TCL coef_")
+reg1 = LinearRegression().fit(feat_vals, source.transpose())
+tcl_score= reg1.score(feat_vals, source.transpose())
+
 import matplotlib.pyplot as plt
 import numpy as np
 plt.imshow(reg1.coef_ ,cmap='hot', interpolation='nearest')
+ax = sns.heatmap(reg1.coef_, cmap="Reds")
 plt.savefig("tcl.png")
-reg2 = LinearRegression().fit(eval_dataset.sensor.transpose(), eval_dataset.source.transpose())
-pca_score= reg2.score(eval_dataset.sensor.transpose(), eval_dataset.source.transpose())
+reg2 = LinearRegression().fit(eval_dataset.sensor.transpose(), source.transpose())
+pca_score= reg2.score(eval_dataset.sensor.transpose(),source.transpose())
 print("PCA coef_")
-plt.imshow(reg1.coef_ ,cmap='hot', interpolation='nearest')
+ax = sns.heatmap(reg2.coef_, cmap="Reds")
 plt.savefig("pca.png")
 
 # Display results ---------------------------------------------
