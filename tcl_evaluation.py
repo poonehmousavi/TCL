@@ -24,7 +24,7 @@ from subfunc.munkres import Munkres
 # parameters ==================================================
 # =============================================================
 
-eval_dir = './storage/temp'
+eval_dir=f'./experiment/layer{5}-seg{8}' 
 parmpath = os.path.join(eval_dir, 'parm.pkl')
 modelpath = os.path.join(eval_dir, 'model.pth')
 apply_fastICA = True
@@ -125,7 +125,7 @@ predictions=[]
 if apply_fastICA:
     ica = FastICA(random_state=random_seed)
 # Evaluate model ----------------------------------------------
-   
+feat_vals =[]
 for data_inputs, data_labels in data_loader:
     ## Step 1: Move input data to device (only strictly necessary if we use GPU)
     x_batch = data_inputs
@@ -138,6 +138,7 @@ for data_inputs, data_labels in data_loader:
     labels.extend(y_batch.detach().numpy())
     predictions.extend(pred.detach().numpy())
         # Apply fastICA -----------------------------------------------
+    feat_vals.append(feats.detach().numpy())
     if apply_fastICA:
         feateval = feats.T 
         feat_val = ica.fit_transform(feateval.detach().numpy())
@@ -157,12 +158,32 @@ for data_inputs, data_labels in data_loader:
 accuracy = accuracy_score(labels, predictions)
 confmat= confusion_matrix(labels, predictions)
 meanabscorr=np.mean(abscorr)
+from sklearn.linear_model import LinearRegression
 
+feat_vals = np.stack(feat_vals, axis=0).reshape(-1,20)
+reg1 = LinearRegression().fit(feat_vals, eval_dataset.source.transpose())
+tcl_score= reg1.score(feat_vals, eval_dataset.source.transpose())
+print("TCL coef_")
+import matplotlib.pyplot as plt
+import numpy as np
+plt.imshow(reg1.coef_ ,cmap='hot', interpolation='nearest')
+plt.savefig("tcl.png")
+reg2 = LinearRegression().fit(eval_dataset.sensor.transpose(), eval_dataset.source.transpose())
+pca_score= reg2.score(eval_dataset.sensor.transpose(), eval_dataset.source.transpose())
+print("PCA coef_")
+plt.imshow(reg1.coef_ ,cmap='hot', interpolation='nearest')
+plt.savefig("pca.png")
 
 # Display results ---------------------------------------------
 print("Result...")
 print("    accuracy(test) : {0:7.4f} [%]".format(accuracy*100))
 print("    correlation     : {0:7.4f}".format(meanabscorr))
+print("    TCL_score(test) : {0:7.4f}".format(tcl_score))
+print("    PCA_score(test) : {0:7.4f} ".format(pca_score))
+print(f"    TCL_intercep(test) :{reg1.intercept_}")
+print(f"    PCA_intercep(test) :{reg2.intercept_}")
+
+
 
 print("done.")
 
